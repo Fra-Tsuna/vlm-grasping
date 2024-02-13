@@ -8,6 +8,12 @@ __pycache__/
 *.pt
 *.onnx
 
+# Images
+
+*.jpg
+*.jpeg
+*.png
+
 # C extensions
 *.so
 

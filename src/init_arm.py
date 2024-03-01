@@ -1,24 +1,16 @@
 #!/usr/bin/env python
 import rospy
-import numpy as np
 import sys
-import copy
-import tf2_ros
-import tf2_py as tf2
-import moveit_commander
-import keyboard
-import cv2
-import moveit_msgs.msg
 import geometry_msgs.msg
+import moveit_commander
+import moveit_msgs.msg
 from math import pi
-from std_msgs.msg import String
-from moveit_commander.conversions import pose_to_list
 
-
-from visualization_msgs.msg import Marker
-from visualization_msgs.msg import MarkerArray
-from nav_msgs.msg import Odometry
-
+display_trajectory_publisher = rospy.Publisher(
+    "/move_group/display_planned_path",
+    moveit_msgs.msg.DisplayTrajectory,
+    queue_size=20,
+)
 
 
 def listener():
@@ -28,7 +20,8 @@ def listener():
     robot = moveit_commander.RobotCommander()
     scene = moveit_commander.PlanningSceneInterface()
     group_name = "arm_torso"
-    move_group = moveit_commander.MoveGroupCommander(group_name)
+    print(group_name)
+    move_group = moveit_commander.MoveGroupCommander("arm_torso")
 
     waypoints = []
     pose2 = geometry_msgs.msg.Pose()
@@ -65,7 +58,8 @@ def listener():
     move_group.stop()
     move_group.clear_pose_targets()
     move_group.go(init_pos, wait=True)
-    move_group.stop()                          
+    move_group.stop() 
+    move_group.clear_pose_targets()                         
 
     #rospy.spin()
 

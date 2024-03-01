@@ -48,6 +48,7 @@ scene = moveit_commander.PlanningSceneInterface()
 print 'c'
 group_name = "arm_torso"
 move_group = moveit_commander.MoveGroupCommander(group_name)
+print 'd'
 
 #display_trajectory_publisher = rospy.Publisher('/move_group/monitored_planning_scene',
                                                #moveit_msgs.msg.DisplayTrajectory,

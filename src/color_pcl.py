@@ -56,6 +56,8 @@ def listener():
     cx = proj_matrix[2]
     cy = proj_matrix[5]
 
+    colors_dict = {}
+
     for idx,point in enumerate(pcd.points):
         if point[2] < 0:
             x_ = point[0]
@@ -68,15 +70,21 @@ def listener():
 
                 if 0 <= x < w and 0 <= y < h and mask[y, x] != 0:
                     image[y,x] = rgb_to_bgr([int(color*255) for color in to_rgb(COLORS[id_color])])
+
                 
                 if 0 <= x < w and 0 <= y < h and mask_flipped[y, x] != 0:
-                    pcd.colors[idx] = [int(color*255) for color in to_rgb(COLORS[id_color])]                 
+                    if COLORS[id_color] not in colors_dict.keys():
+                        colors_dict[COLORS[id_color]] = []
+                    pcd.colors[idx] = [int(color*255) for color in to_rgb(COLORS[id_color])]   
+                    colors_dict[COLORS[id_color]].append(point)              
 
     cv2.imwrite(CONFIG_DIR+'boh.png', image)
 
     o3d.visualization.draw_geometries([pcd])
 
     o3d.io.write_point_cloud(CONFIG_DIR+'colored_pcl.pcd', pcd)
+    with open(CONFIG_DIR+'dict/colors_dict.pkl', 'wb') as f:
+        pickle.dump(colors_dict, f)
     return
 
 

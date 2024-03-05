@@ -1,0 +1,6 @@
+NOT A REAL LAUNCHFILE, JUST TO KEEP IN MIND OF THE FLOW
+
+rosrun vlm_grasping create_pcl.py -> crea pointcloud e salva immagine
+(fuori container) python3 get_yolow_bb_p3.py -> crea maschere e get_yolow_bb_p3
+rosrun vlm_grasping color_pcl.py -> colora la pointcloud in base alle maschere
+rosrun vlm_grasping spawn_clusters_centroid.py -> popola rviz con centroidi

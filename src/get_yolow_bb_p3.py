@@ -1,4 +1,3 @@
-import onnxruntime
 import cv2
 import numpy as np
 import time
@@ -6,6 +5,14 @@ import os
 import matplotlib.pyplot as plt
 import pickle
 import torch
+
+import torch
+from mmengine.config import Config
+from mmengine.dataset import Compose
+from mmengine.runner import Runner
+from mmengine.runner.amp import autocast
+from mmyolo.registry import RUNNERS
+from torchvision.ops import nms
 
 from vitsam import VitSam
 from vitsam import show_mask
@@ -20,15 +27,15 @@ from vitsam import show_mask
 #     "electric plug", "screw", "nail", "box", "stool", "shelf"
 # ]
 
-labels = ["bottle", "can", "cup", "box"]
+labels = "(bottle, can, cup, box)"
 
 
 
-CONFIG = "/home/semanticnuc/Desktop/Tiago/TIAGo-RoCoCo/KG_Reasoning/vlm-grasping/config/"
-IMAGES = "/home/semanticnuc/Desktop/Tiago/TIAGo-RoCoCo/KG_Reasoning/vlm-grasping/images/"
+CONFIG = "/home/michele/Desktop/Paper IROS/vlm-grasping/config/"
+IMAGES = "/home/michele/Desktop/Paper IROS/vlm-grasping/images/"
 
 # YOLOW_PATH = CONFIG + "yolow/yolow-l.onnx"
-YOLOW_PATH = CONFIG + "yolow/sort.onnx"
+#YOLOW_PATH = CONFIG + "yolow/sort.onnx"
 ENCODER_PATH = CONFIG + "efficientvitsam/l2_encoder.onnx"
 DECODER_PATH = CONFIG + "efficientvitsam/l2_decoder.onnx"
 
@@ -77,33 +84,57 @@ def convert_bb(old_coords):
 
 class YOLOW():
 
-    def __init__(self, yolo_path = YOLOW_PATH) -> None:
-        self.yolow = onnxruntime.InferenceSession(yolo_path)
-        torch.cuda.is_available() 
-        if not torch.cuda.is_available():
-            self.yolow.set_providers(['CPUExecutionProvider'])
+    def __init__(self):
+        cfg = Config.fromfile(
+            "src/yolo_world/yolo_world_l_t2i_bn_2e-4_100e_4x8gpus_obj365v1_goldg_train_lvis_minival.py"
+        )
+        cfg.work_dir = "."
+        cfg.load_from = "src/yolo_world/yolow-v8_l_clipv2_frozen_t2iv2_bn_o365_goldg_pretrain.pth"
+        cfg.__setattr__("log_level","WARNING")
+        self.runner = Runner.from_cfg(cfg)
+        self.runner.call_hook("before_run")
+        self.runner.load_or_resume()
+        pipeline = cfg.test_dataloader.dataset.pipeline
+        self.runner.pipeline = Compose(pipeline)
+        self.runner.model.eval()
 
-        self.name_of_input = self.yolow.get_inputs()[0].name
-        self.input_shape = self.yolow.get_inputs()[0].shape
-        self.type_of_input = self.yolow.get_inputs()[0].type
+    def set_class_name(self,objects):
+        self.class_names = (objects)
+        self.objects = objects.split(",")
 
 
-    def __call__(self, image):
-        cropped_image = crop_image(image, self.input_shape[3])
-        cropped_image = np.transpose(cropped_image, (2, 0, 1)) 
-        cropped_image = cropped_image / 255
-        cropped_image = np.expand_dims(cropped_image, axis=0)  # Add batch dimension
-        if "float" in self.type_of_input:
-            input_tensor = cropped_image.astype(np.float32)
-        else:
-            input_tensor = cropped_image.astype(np.uint8)
+    def __call__(self,input_image,max_num_boxes=100,score_thr=0.05,nms_thr=0.5):
 
-        output = self.yolow.run(None, {'images': input_tensor})
-        bboxs = output[1][0]
-        scores = output[2][0]
-        labels_idx = output[3][0]
+        texts = [[t.strip()] for t in self.class_names.split(",")] + [[" "]]
+        data_info = self.runner.pipeline(dict(img_id=0, img_path=input_image,
+                                        texts=texts))
 
-        return bboxs, scores, labels_idx
+        data_batch = dict(
+            inputs=data_info["inputs"].unsqueeze(0),
+            data_samples=[data_info["data_samples"]],
+        )
+
+        with autocast(enabled=False), torch.no_grad():
+            output = self.runner.model.test_step(data_batch)[0]
+            self.runner.model.class_names = texts
+            pred_instances = output.pred_instances
+
+        keep_idxs = nms(pred_instances.bboxes, pred_instances.scores, iou_threshold=nms_thr)
+        pred_instances = pred_instances[keep_idxs]
+        pred_instances = pred_instances[pred_instances.scores.float() > score_thr]
+
+        if len(pred_instances.scores) > max_num_boxes:
+            indices = pred_instances.scores.float().topk(max_num_boxes)[1]
+            pred_instances = pred_instances[indices]
+        output.pred_instances = pred_instances
+
+        pred_instances = pred_instances.cpu().numpy()
+
+        xyxy=pred_instances['bboxes'],
+        class_id=pred_instances['labels'],
+        confidence=pred_instances['scores'] 
+
+        return xyxy, confidence, class_id
 
         
 def main():
@@ -112,8 +143,8 @@ def main():
     images.sort()
 
     sam = VitSam(encoder_model=ENCODER_PATH, decoder_model=DECODER_PATH)
-    yolow = YOLOW(yolo_path=YOLOW_PATH)
-
+    yolow = YOLOW()
+    yolow.set_class_name(labels)
     for image_path in images:
 
         image = cv2.imread(IMAGE_DIR + image_path)
@@ -122,7 +153,7 @@ def main():
         image_with_bbox = image.copy()
 
         #YOLOW inference
-        bboxs, scores, labels_idx = yolow(image)
+        bboxs, scores, labels_idx = yolow(IMAGE_DIR + image_path)
 
         for i in range(len(bboxs)-1):
             

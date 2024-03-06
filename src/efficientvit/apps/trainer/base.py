@@ -13,6 +13,9 @@ from efficientvit.apps.utils import EMA, dist_barrier, get_dist_local_rank, is_m
 from efficientvit.models.nn.norm import reset_bn
 from efficientvit.models.utils import is_parallel, load_state_dict_from_file
 
+from typing import Dict as dict, List as list, Tuple as tuple
+
+
 __all__ = ["Trainer"]
 
 

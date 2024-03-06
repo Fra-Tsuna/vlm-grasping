@@ -213,7 +213,7 @@ def main():
     args = parse_args()
     models_root = args.root
     models_out = args.out
-    mkdir_or_exist(models_out)
+    # mkdir_or_exist(models_out)
 
     # find all models in the root directory to be gathered
     raw_configs = list(scandir('./configs', '.py', recursive=True))
@@ -269,7 +269,7 @@ def main():
     publish_model_infos = []
     for model in model_infos:
         model_publish_dir = osp.join(models_out, model['config'].rstrip('.py'))
-        mkdir_or_exist(model_publish_dir)
+        # mkdir_or_exist(model_publish_dir)
 
         model_name = osp.split(model['config'])[-1].split('.')[0]
 

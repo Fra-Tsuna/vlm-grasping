@@ -9,6 +9,9 @@ from efficientvit.models.efficientvit.backbone import EfficientViTBackbone, Effi
 from efficientvit.models.nn import ConvLayer, LinearLayer, OpSequential
 from efficientvit.models.utils import build_kwargs_from_config
 
+from typing import Dict as dict, List as list, Tuple as tuple
+
+
 __all__ = [
     "EfficientViTCls",
     ######################

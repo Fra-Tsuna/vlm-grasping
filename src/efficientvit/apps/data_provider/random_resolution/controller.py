@@ -8,6 +8,9 @@ import torch
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
 
+from typing import Dict as dict, List as list, Tuple as tuple
+
+
 from efficientvit.models.utils import torch_random_choices
 
 __all__ = [

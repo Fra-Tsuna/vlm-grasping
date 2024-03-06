@@ -3,6 +3,8 @@
 # International Conference on Computer Vision (ICCV), 2023
 
 import numpy as np
+from typing import Dict as dict, List as list, Tuple as tuple
+
 
 __all__ = ["rand_bbox"]
 

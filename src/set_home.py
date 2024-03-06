@@ -20,7 +20,7 @@ def listener():
     robot = moveit_commander.RobotCommander()
     scene = moveit_commander.PlanningSceneInterface()
     group_name = "arm_torso"
-    move_group = moveit_commander.MoveGroupCommander("arm_torso")
+    move_group = moveit_commander.MoveGroupCommander(group_name)
 
     # Move arm to the initial position
     init_pos = [0, 0, 0, 0, 0, 0, 0, 0]

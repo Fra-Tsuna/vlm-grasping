@@ -11,6 +11,9 @@ from torch.utils.data.distributed import DistributedSampler
 from efficientvit.apps.data_provider.random_resolution import RRSController
 from efficientvit.models.utils import val2tuple
 
+from typing import Dict as dict, List as list, Tuple as tuple
+
+
 __all__ = ["parse_image_size", "random_drop_data", "DataProvider"]
 
 

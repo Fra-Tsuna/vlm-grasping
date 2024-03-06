@@ -4,6 +4,8 @@
 
 import torch
 
+from typing import Dict as dict, List as list, Tuple as tuple
+
 __all__ = ["REGISTERED_OPTIMIZER_DICT", "build_optimizer"]
 
 # register optimizer here

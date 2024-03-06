@@ -51,7 +51,7 @@ def parse_repo_name(repo_name):
 
 
 def git_pull_branch(repo_name, branch_name='', pulldir='.'):
-    mkdir_or_exist(pulldir)
+    # mkdir_or_exist(pulldir)
     exec_str = f'cd {pulldir};git init;git pull '
     exec_str += f'{host_addr}/{repo_name}.git'
     if branch_name:
@@ -414,7 +414,7 @@ def main():
     assert isinstance(args.out, str), \
         'The type of output path must be string'
     # save path of file
-    mkdir_or_exist(args.out)
+    # mkdir_or_exist(args.out)
     save_path = osp.join(args.out, 'registries_info.md')
     with tempfile.TemporaryDirectory() as tmpdir:
         # multi process init

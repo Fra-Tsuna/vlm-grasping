@@ -82,8 +82,8 @@ def main():
 
     pre_pipeline = preprocess(cfg)
 
-    if not args.show:
-        path.mkdir_or_exist(args.out_dir)
+    # if not args.show:
+    #     path.mkdir_or_exist(args.out_dir)
 
     # get file list
     files, source_type = get_file_list(args.img)

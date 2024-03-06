@@ -1,17 +1,13 @@
 import cv2
-import numpy as np
-import time
 import os
-import matplotlib.pyplot as plt
+import time
 import pickle
-import torch
 
 import torch
 from mmengine.config import Config
 from mmengine.dataset import Compose
 from mmengine.runner import Runner
 from mmengine.runner.amp import autocast
-from mmyolo.registry import RUNNERS
 from torchvision.ops import nms
 
 from vitsam import VitSam
@@ -27,12 +23,12 @@ from vitsam import show_mask
 #     "electric plug", "screw", "nail", "box", "stool", "shelf"
 # ]
 
-labels = "(bottle, can, cup, box)"
+labels = "bottle, can, cup, box"
 
 
 
-CONFIG = "/home/michele/Desktop/Paper IROS/vlm-grasping/config/"
-IMAGES = "/home/michele/Desktop/Paper IROS/vlm-grasping/images/"
+CONFIG = "/home/semanticnuc/Desktop/Tiago/TIAGo-RoCoCo/KG_Reasoning/vlm-grasping/config/"
+IMAGES = "/home/semanticnuc/Desktop/Tiago/TIAGo-RoCoCo/KG_Reasoning/vlm-grasping/images/"
 
 # YOLOW_PATH = CONFIG + "yolow/yolow-l.onnx"
 #YOLOW_PATH = CONFIG + "yolow/sort.onnx"
@@ -49,37 +45,37 @@ EVSAM_OUTPUT_DIR = IMAGE_DIR
 
 DUMP = CONFIG + "dump_order/"
 
-def crop_image(image_, target_size):
-    # Read the image
-    image = image_.copy()
+# def crop_image(image_, target_size):
+#     # Read the image
+#     image = image_.copy()
     
-    # Get current dimensions
-    current_height, current_width = image.shape[:2]
+#     # Get current dimensions
+#     current_height, current_width = image.shape[:2]
 
-    if current_height < current_width:
-        crop_quantity = -(current_height-current_width)
-        cropped_image = image[:,crop_quantity//2:-(crop_quantity//2)]
-    else:
-        crop_quantity = -(current_width-current_height)
-        cropped_image = image[crop_quantity//2:-(crop_quantity//2),:]
+#     if current_height < current_width:
+#         crop_quantity = -(current_height-current_width)
+#         cropped_image = image[:,crop_quantity//2:-(crop_quantity//2)]
+#     else:
+#         crop_quantity = -(current_width-current_height)
+#         cropped_image = image[crop_quantity//2:-(crop_quantity//2),:]
     
 
-    return cv2.resize(cropped_image, (target_size, target_size))
+#     return cv2.resize(cropped_image, (target_size, target_size))
 
 
-def convert_bb(old_coords):
-    actual_image_size = (640,640)
-    previous_image_size = (480,480)
-    scale_width = previous_image_size[0] / actual_image_size[0]
-    scale_height = previous_image_size[1] / actual_image_size[1]
-    offset = (actual_image_size[0] - previous_image_size[0]) // 2
-    x1, y1, x2, y2 = old_coords
-    x1 = int(x1 * scale_width) +offset
-    y1 = int((y1) * scale_height)
-    x2 = int(x2 * scale_width) + offset
-    y2 = int((y2) * scale_height) 
+# def convert_bb(old_coords):
+#     actual_image_size = (640,640)
+#     previous_image_size = (480,480)
+#     scale_width = previous_image_size[0] / actual_image_size[0]
+#     scale_height = previous_image_size[1] / actual_image_size[1]
+#     offset = (actual_image_size[0] - previous_image_size[0]) // 2
+#     x1, y1, x2, y2 = old_coords
+#     x1 = int(x1 * scale_width) +offset
+#     y1 = int((y1) * scale_height)
+#     x2 = int(x2 * scale_width) + offset
+#     y2 = int((y2) * scale_height) 
    
-    return [x1,y1,x2,y2]
+#     return [x1,y1,x2,y2]
 
 
 class YOLOW():
@@ -88,8 +84,8 @@ class YOLOW():
         cfg = Config.fromfile(
             "src/yolo_world/yolo_world_l_t2i_bn_2e-4_100e_4x8gpus_obj365v1_goldg_train_lvis_minival.py"
         )
-        cfg.work_dir = "."
-        cfg.load_from = "src/yolo_world/yolow-v8_l_clipv2_frozen_t2iv2_bn_o365_goldg_pretrain.pth"
+        cfg.work_dir = "/home/semanticnuc/Desktop/Tiago/TIAGo-RoCoCo/KG_Reasoning/vlm-grasping/config/yolow/"
+        cfg.load_from = "/home/semanticnuc/Desktop/Tiago/TIAGo-RoCoCo/KG_Reasoning/vlm-grasping/config/yolow/yolow.pth"
         cfg.__setattr__("log_level","WARNING")
         self.runner = Runner.from_cfg(cfg)
         self.runner.call_hook("before_run")
@@ -102,6 +98,8 @@ class YOLOW():
         self.class_names = (objects)
         self.objects = objects.split(",")
 
+    def get_class_name(self, id):
+        return self.objects[id]
 
     def __call__(self,input_image,max_num_boxes=100,score_thr=0.05,nms_thr=0.5):
 
@@ -155,19 +153,16 @@ def main():
         #YOLOW inference
         bboxs, scores, labels_idx = yolow(IMAGE_DIR + image_path)
 
-        for i in range(len(bboxs)-1):
+        for i, (bbox,score,cls_id) in enumerate(zip(bboxs[0], scores, labels_idx[0])):
             
-            score = scores[i]
             if score > 0.10:
 
                 # EfficientViT SAM inference
-                bbox = bboxs[i]
 
-                bbox = convert_bb(bbox)
+                # bbox = convert_bb(bbox)
                 x1,y1,x2,y2 = bbox
 
-                label_idx = int(labels_idx[i])
-                label = labels[label_idx]
+                label = yolow.get_class_name(cls_id)
                 masks, _ = sam(masked_image, bbox)
 
                 # Convert binary mask to 3-channel image
@@ -177,8 +172,6 @@ def main():
                     with open(f'{DUMP}box{i}.pkl', 'wb') as f:
                         pickle.dump(binary_mask, f, protocol=2)
                     overlay = cv2.addWeighted(overlay, 1, binary_mask, 0.5, 0)
-
-                label_idx = int(labels_idx[i])
 
                 cv2.rectangle(image_with_bbox, (int(x1), int(y1)), (int(x2), int(y2)), (255, 0, 0), 1)
                 cv2.putText(image_with_bbox, f"{label}: {score:.2f}", (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 1)

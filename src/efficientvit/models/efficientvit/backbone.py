@@ -5,6 +5,9 @@
 import torch
 import torch.nn as nn
 
+from typing import Dict as dict, List as list, Tuple as tuple
+
+
 from efficientvit.models.nn import (
     ConvLayer,
     DSConv,

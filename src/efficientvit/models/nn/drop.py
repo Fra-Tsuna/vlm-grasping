@@ -10,6 +10,9 @@ from efficientvit.apps.trainer.run_config import Scheduler
 from efficientvit.models.nn.ops import IdentityLayer, ResidualBlock
 from efficientvit.models.utils import build_kwargs_from_config
 
+from typing import Dict as dict, List as list, Tuple as tuple
+
+
 __all__ = ["apply_drop_func"]
 
 

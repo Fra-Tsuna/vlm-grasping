@@ -8,6 +8,9 @@ import torch
 
 from efficientvit.models.utils.list import val2list
 
+from typing import Dict as dict, List as list, Tuple as tuple
+
+
 __all__ = ["CosineLRwithWarmup"]
 
 

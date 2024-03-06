@@ -84,7 +84,7 @@ def build_model_from_cfg(config_path, checkpoint_path, device):
 
 def main():
     args = parse_args()
-    mkdir_or_exist(args.work_dir)
+    # mkdir_or_exist(args.work_dir)
     backend = MMYOLOBackend(args.backend.lower())
     if backend in (MMYOLOBackend.ONNXRUNTIME, MMYOLOBackend.OPENVINO,
                    MMYOLOBackend.TENSORRT8, MMYOLOBackend.TENSORRT7):

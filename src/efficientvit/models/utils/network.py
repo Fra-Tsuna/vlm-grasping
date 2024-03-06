@@ -8,6 +8,8 @@ from inspect import signature
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from typing import Dict as dict, List as list, Tuple as tuple
+
 
 __all__ = [
     "is_parallel",

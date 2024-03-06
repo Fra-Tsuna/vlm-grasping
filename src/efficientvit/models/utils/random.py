@@ -2,6 +2,9 @@
 # Han Cai, Junyan Li, Muyan Hu, Chuang Gan, Song Han
 # International Conference on Computer Vision (ICCV), 2023
 
+from typing import Dict as dict, List as list, Tuple as tuple
+
+
 import numpy as np
 import torch
 

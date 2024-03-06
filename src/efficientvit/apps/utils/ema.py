@@ -10,6 +10,9 @@ import torch.nn as nn
 
 from efficientvit.models.utils import is_parallel
 
+from typing import Dict as dict, List as list, Tuple as tuple
+
+
 __all__ = ["EMA"]
 
 

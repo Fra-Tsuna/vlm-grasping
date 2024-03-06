@@ -6,7 +6,9 @@ __pycache__/
 
 # Models
 *.pt
+*.pth
 *.onnx
+*.pkl
 
 # Images
 

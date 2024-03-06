@@ -27,10 +27,10 @@ labels = "bottle, can, cup, box"
 
 
 
-CONFIG = "/home/semanticnuc/Desktop/Tiago/TIAGo-RoCoCo/KG_Reasoning/vlm-grasping/config/"
-IMAGES = "/home/semanticnuc/Desktop/Tiago/TIAGo-RoCoCo/KG_Reasoning/vlm-grasping/images/"
+CONFIG = os.path.join(os.getcwd(),"config/")
+IMAGES = os.path.join(os.getcwd(),"images/")
 
-# YOLOW_PATH = CONFIG + "yolow/yolow-l.onnx"
+YOLOW_PATH = CONFIG + "yolow/"
 #YOLOW_PATH = CONFIG + "yolow/sort.onnx"
 ENCODER_PATH = CONFIG + "efficientvitsam/l2_encoder.onnx"
 DECODER_PATH = CONFIG + "efficientvitsam/l2_decoder.onnx"
@@ -82,10 +82,10 @@ class YOLOW():
 
     def __init__(self):
         cfg = Config.fromfile(
-            "src/yolo_world/yolo_world_l_t2i_bn_2e-4_100e_4x8gpus_obj365v1_goldg_train_lvis_minival.py"
+            YOLOW_PATH + "yolo_world_l_t2i_bn_2e-4_100e_4x8gpus_obj365v1_goldg_train_lvis_minival.py"
         )
-        cfg.work_dir = "/home/semanticnuc/Desktop/Tiago/TIAGo-RoCoCo/KG_Reasoning/vlm-grasping/config/yolow/"
-        cfg.load_from = "/home/semanticnuc/Desktop/Tiago/TIAGo-RoCoCo/KG_Reasoning/vlm-grasping/config/yolow/yolow.pth"
+        cfg.work_dir = YOLOW_PATH
+        cfg.load_from = YOLOW_PATH + "yolow.pth"
         cfg.__setattr__("log_level","WARNING")
         self.runner = Runner.from_cfg(cfg)
         self.runner.call_hook("before_run")

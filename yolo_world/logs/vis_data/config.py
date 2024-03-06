@@ -333,7 +333,7 @@ last_transform = [
         ),
         type='mmdet.PackDetInputs'),
 ]
-load_from = '/home/michele/Desktop/Paper IROS/vlm-grasping/config/yolow/yolow.pth'
+load_from = 'src/yolo_world/yolow-v8_l_clipv2_frozen_t2iv2_bn_o365_goldg_pretrain.pth'
 log_level = 'WARNING'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
 loss_bbox_weight = 7.5
@@ -1363,4 +1363,4 @@ visualizer = dict(
     ])
 weight_decay = 0.025
 widen_factor = 1.0
-work_dir = '/home/michele/Desktop/Paper IROS/vlm-grasping/config/yolow/'
+work_dir = 'yolo_world'

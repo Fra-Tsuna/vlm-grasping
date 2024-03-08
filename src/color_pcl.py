@@ -44,9 +44,12 @@ def listener():
     for file in os.listdir(CONFIG_DIR):
         if file.endswith(".pkl"):
             with open(CONFIG_DIR+file, 'rb') as f:
-                mask = pickle.load(f)
-                masks.append(mask[:,:,0])
-                masks_flipped.append(cv2.flip(mask[:,:,0],1))
+                detections = pickle.load(f)
+
+    for key in detections.keys():
+        mask = detections[key]['mask']
+        masks.append(mask[:,:,0])
+        masks_flipped.append(cv2.flip(mask[:,:,0],1))
 
     camera_info = rospy.wait_for_message("/xtion/depth/camera_info", CameraInfo)
     proj_matrix = camera_info.K   
@@ -67,16 +70,15 @@ def listener():
             y = int((fy * y_ / z_) + cy)
 
             for id_color, (mask, mask_flipped) in enumerate(zip(masks, masks_flipped)):
-
                 if 0 <= x < w and 0 <= y < h and mask[y, x] != 0:
                     image[y,x] = rgb_to_bgr([int(color*255) for color in to_rgb(COLORS[id_color])])
 
                 
                 if 0 <= x < w and 0 <= y < h and mask_flipped[y, x] != 0:
-                    if COLORS[id_color] not in colors_dict.keys():
-                        colors_dict[COLORS[id_color]] = []
+                    if id_color not in colors_dict.keys():
+                        colors_dict[id_color] = []
                     pcd.colors[idx] = [int(color*255) for color in to_rgb(COLORS[id_color])]   
-                    colors_dict[COLORS[id_color]].append(point)              
+                    colors_dict[id_color].append(point)              
 
     cv2.imwrite(CONFIG_DIR+'boh.png', image)
 

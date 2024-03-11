@@ -74,7 +74,7 @@ def set_names(marker_, label):
     marker.pose.position.z += 0.1
     marker.type = marker.TEXT_VIEW_FACING
     marker.text = label
-    marker.scale.z = 0.2
+    marker.scale.z = 0.1
 
     return marker
     

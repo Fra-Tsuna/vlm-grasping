@@ -51,6 +51,7 @@ def listener():
         masks.append(mask[:,:,0])
         masks_flipped.append(cv2.flip(mask[:,:,0],1))
 
+
     camera_info = rospy.wait_for_message("/xtion/depth/camera_info", CameraInfo)
     proj_matrix = camera_info.K   
 

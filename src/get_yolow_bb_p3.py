@@ -9,7 +9,7 @@ from models import show_mask
 
 
 
-labels = "carton, table, cup, soda"
+labels = "recycling bin,chair,can,crumpled paper,table"
 
 
 CONFIG = os.path.join(os.getcwd(),"config/")
@@ -54,7 +54,7 @@ def main():
 
         for i, (bbox,score,cls_id) in enumerate(zip(bboxs[0], scores, labels_idx[0])):
             
-            if score > 0.10:
+            if score > 0.15:
 
                 # EfficientViT SAM inference
 

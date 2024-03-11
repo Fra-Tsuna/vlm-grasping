@@ -16,8 +16,7 @@ import tf2_py as tf2
 import pickle
 
 # GRABBING_QUATERNION =  Quaternion(-0.528,0.412,0.473,0.571)
-g = Quaternion(-0.742818371853,-0.0634568007104,0.0418472405416,0.665163821431)
-GRABBING_QUATERNION = g
+GRABBING_QUATERNION = Quaternion(-0.742818371853,-0.0634568007104,0.0418472405416,0.665163821431)
 GRIPPER_OFFSET = 0.15
 
 def reach_pose(group,pose):
@@ -31,71 +30,100 @@ def close_grippers(gripper):
     gripper.stop()
     gripper.clear_pose_targets()
 
+def reach_waypoints(group,waypoints):
+    (plan, fraction) = group.compute_cartesian_path(
+                           waypoints,   # waypoints to follow
+                           0.01,        # eef_step
+                           0.0)         # jump_threshold
+    group.execute(plan, wait=True)
+    group.stop()
+    group.clear_pose_targets()
+
 def open_grippers(gripper):
     gripper.go([0.04, 0.04], wait=True)
     gripper.stop()
     gripper.clear_pose_targets()
 
-# def grab(object):
-#     arm_group = moveit_commander.MoveGroupCommander("arm_torso")
-#     init_pose = arm_group.get_current_pose().pose
-#     print(init_pose)
-#     pose = Pose()
-#     # pose.position.x = object.pose.position.x
-#     # pose.position.y = object.pose.position.y
-#     pose.position.z = object.pose.position.z + GRIPPER_OFFSET
-#     pose.orientation = GRABBING_QUATERNION
-#     reach_pose(arm_group, pose)
-#     close_grippers()
-#     reach_pose(arm_group, init_pose)
-
-# def drop(goal_pose):
-#     arm_group = moveit_commander.MoveGroupCommander("arm_torso")
-#     init_pose = arm_group.get_current_pose().pose
-#     pose = Pose()
-#     pose.position = goal_pose.pose.position
-#     pose.position.z += GRIPPER_OFFSET
-#     pose.orientation = GRABBING_QUATERNION
-#     reach_pose(arm_group, pose)
-#     open_grippers()
-#     reach_pose(arm_group, init_pose)
+def grab(group, gripper, object):
+    init_pose = group.get_current_pose().pose
     
-def down(group,z):
-    init_pose = group.get_current_pose().pose
-    pose = init_pose
-    pose.position.z -= z
-    reach_pose(group, pose)
+    wp1 = copy.deepcopy(init_pose)
+    wp1.position.z = object.pose.position.z
+    wp2 = copy.deepcopy(wp1)
+    wp2.position.y = object.pose.position.y
 
-def up(group,z):
-    init_pose = group.get_current_pose().pose
-    pose = init_pose
-    pose.position.z += z
-    reach_pose(group, pose)    
-
-def right(group, y):
-    init_pose = group.get_current_pose().pose
-    pose = init_pose
-    pose.position.y -= y
-    reach_pose(group, pose)    
-
-def left(group, y):
-    init_pose = group.get_current_pose().pose
-    pose = init_pose
-    pose.position.y += y
-    reach_pose(group, pose)    
-
-def forward(group, x):
-    init_pose = group.get_current_pose().pose
-    pose = init_pose
-    pose.position.x += x
-    pose.position.x -= GRIPPER_OFFSET
+    pose = Pose()
+    pose.position.x = object.pose.position.x - GRIPPER_OFFSET
+    pose.position.y = object.pose.position.y
+    pose.position.z = object.pose.position.z
     pose.orientation = GRABBING_QUATERNION
-    reach_pose(group, pose)    
+    wp3 = pose
 
-def back(group, x):
+    waypoints = [wp1, wp2, wp3]
+    reversed_waypoints = [wp2, wp1, init_pose]
+    
+    reach_waypoints(group, waypoints)
+    close_grippers(gripper)
+    reach_waypoints(group, reversed_waypoints)
+
+def drop(group, gripper, goal_pose):
     init_pose = group.get_current_pose().pose
-    pose = init_pose
-    pose.position.x -= x
-    pose.position.x += GRIPPER_OFFSET
+    
+    wp1 = copy.deepcopy(init_pose)
+    wp1.position.z = goal_pose.pose.position.z
+    wp2 = copy.deepcopy(wp1)
+    wp2.position.y = goal_pose.pose.position.y
+
+    pose = Pose()
+    pose.position.x = goal_pose.pose.position.x - GRIPPER_OFFSET
+    pose.position.y = goal_pose.pose.position.y
+    pose.position.z = goal_pose.pose.position.z
     pose.orientation = GRABBING_QUATERNION
-    reach_pose(group, pose)    
+    wp3 = pose
+
+    waypoints = [wp1, wp2, wp3]
+    reversed_waypoints = [wp2, wp1, init_pose]
+    
+    reach_waypoints(group, waypoints)
+    open_grippers(gripper)
+    reach_waypoints(group, reversed_waypoints)
+    
+# def down(group,z):
+#     init_pose = group.get_current_pose().pose
+#     pose = init_pose
+#     pose.position.z -= z
+#     reach_pose(group, pose)
+
+# def up(group,z):
+#     init_pose = group.get_current_pose().pose
+#     pose = init_pose
+#     pose.position.z += z
+#     reach_pose(group, pose)    
+
+# def right(group, y):
+#     init_pose = group.get_current_pose().pose
+#     pose = init_pose
+#     pose.position.y -= y
+#     reach_pose(group, pose)    
+
+# def left(group, y):
+#     init_pose = group.get_current_pose().pose
+#     pose = init_pose
+#     pose.position.y += y
+#     reach_pose(group, pose)    
+
+# def forward(group, x):
+#     init_pose = group.get_current_pose().pose
+#     pose = init_pose
+#     pose.position.x += x
+#     pose.position.x -= GRIPPER_OFFSET
+#     pose.orientation = GRABBING_QUATERNION
+#     reach_pose(group, pose)    
+
+# def back(group, x):
+#     init_pose = group.get_current_pose().pose
+#     pose = init_pose
+#     pose.position.x -= x
+#     pose.position.x += GRIPPER_OFFSET
+#     pose.orientation = GRABBING_QUATERNION
+#     reach_pose(group, pose)    

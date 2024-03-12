@@ -1,19 +1,17 @@
 
 
-import numpy as np
-import cv2
 import torch
-import torch.nn.functional as F
-import torchvision.transforms as transforms
-from torchvision.ops import nms
-
-from efficientvit.export_encoder import SamResize
-from efficientvit.inference import SamDecoder, SamEncoder
-
 from mmengine.config import Config
 from mmengine.dataset import Compose
 from mmengine.runner import Runner
 from mmengine.runner.amp import autocast
+from torchvision.ops import nms
+import numpy as np
+import cv2
+import torch.nn.functional as F
+import torchvision.transforms as transforms
+from efficientvit.export_encoder import SamResize
+from efficientvit.inference import SamDecoder, SamEncoder
 
 class VitSam():
 
@@ -52,27 +50,16 @@ class VitSam():
 
         return x
     
-def show_mask(mask, random_color = True):
-    if random_color:
-        color = np.concatenate([np.random.random(3)], axis=0)
-    else:
-        color = np.array([30 / 255, 144 / 255, 255 / 255])
-    h, w = mask.shape[-2:]
-    mask_image = mask.reshape(h, w, 1) * color.reshape(1, 1, -1)
-    mask_image = mask_image.numpy() * 255
-    mask_image = mask_image.astype(np.uint8)
-    return mask_image
-
-
+    
 
 class YOLOW():
 
-    def __init__(self, path):
+    def __init__(self,YOLOW_PATH):
         cfg = Config.fromfile(
-            path + "yolo_world_l_t2i_bn_2e-4_100e_4x8gpus_obj365v1_goldg_train_lvis_minival.py"
+            YOLOW_PATH + "yolo_world_l_t2i_bn_2e-4_100e_4x8gpus_obj365v1_goldg_train_lvis_minival.py"
         )
-        cfg.work_dir = path
-        cfg.load_from = path + "yolow.pth"
+        cfg.work_dir = YOLOW_PATH
+        cfg.load_from = YOLOW_PATH + "yolow.pth"
         cfg.__setattr__("log_level","WARNING")
         self.runner = Runner.from_cfg(cfg)
         self.runner.call_hook("before_run")

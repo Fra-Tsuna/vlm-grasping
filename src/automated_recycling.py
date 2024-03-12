@@ -66,7 +66,7 @@ def listener():
     for name, marker in zip(name_list.markers, centroid_list.markers):
         if name.text == ' can':
             can = copy.deepcopy(marker)
-        if name.text == ' crumpled paper':
+        if name.text == 'paper':
             paper = copy.deepcopy(marker)
         if name.text == ' recycling bin for paper':
             rb_paper = copy.deepcopy(marker)
@@ -78,6 +78,7 @@ def listener():
     paper.pose.position.x = paper_array[0]
     paper.pose.position.y = paper_array[1]
     paper.pose.position.z = paper_array[2]
+    print(paper.pose)
 
     can_array = np.array([can.pose.position.x, can.pose.position.y, can.pose.position.z])
     can_array = np.dot(np.transpose(R_m2b), can_array-T_m2b)
@@ -104,15 +105,15 @@ def listener():
     arm_group = moveit_commander.MoveGroupCommander("arm")
     gripper = moveit_commander.MoveGroupCommander("gripper")
 
-    grab(arm_group, gripper, paper)
+    grab(arm_torso_group, gripper, paper)
     goal_paper_pose = copy.deepcopy(rb_paper)
     goal_paper_pose.pose.position.z += 0.3
-    drop(arm_group, gripper, goal_paper_pose)
+    drop(arm_torso_group, gripper, goal_paper_pose)
 
-    grab(arm_group, gripper, can)
+    grab(arm_torso_group, gripper, can)
     goal_can_pose = copy.deepcopy(rb_plastic)
     goal_can_pose.pose.position.z += 0.3
-    drop(arm_group, gripper, goal_can_pose)
+    drop(arm_torso_group, gripper, goal_can_pose)
 
 
 if __name__ == '__main__':

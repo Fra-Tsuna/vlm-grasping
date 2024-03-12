@@ -24,7 +24,7 @@ SCAN_DIR = ROOT_DIR+'/images/test_order/'
 
 CONFIG_DIR = ROOT_DIR+'/config/dump_order/'
 
-COLORS = ['red', 'green', 'blue', 'yellow', 'magenta', 'cyan', 'white', 'black']
+COLORS = ['red', 'green', 'blue', 'magenta', 'cyan','yellow', 'green', 'cyan', 'magenta', 'cyan']
 
 def rgb_to_bgr(rgb_color):
     r, g, b = rgb_color
@@ -41,10 +41,8 @@ def listener():
 
     masks = []
     masks_flipped = []
-    for file in os.listdir(CONFIG_DIR):
-        if file.endswith(".pkl"):
-            with open(CONFIG_DIR+file, 'rb') as f:
-                detections = pickle.load(f)
+    with open(CONFIG_DIR+"detection.pkl", 'rb') as f:
+        detections = pickle.load(f)
 
     for key in detections.keys():
         mask = detections[key]['mask']

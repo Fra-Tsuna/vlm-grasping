@@ -46,6 +46,7 @@ def open_grippers(gripper):
 
 def grab(group, gripper, object):
     init_pose = group.get_current_pose().pose
+    print(init_pose)
     
     wp1 = copy.deepcopy(init_pose)
     wp1.position.z = object.pose.position.z
@@ -64,7 +65,8 @@ def grab(group, gripper, object):
     
     reach_waypoints(group, waypoints)
     close_grippers(gripper)
-    reach_waypoints(group, reversed_waypoints)
+    #reach_waypoints(group, reversed_waypoints)
+    
 
 def drop(group, gripper, goal_pose):
     init_pose = group.get_current_pose().pose

@@ -17,7 +17,7 @@ SCAN_DIR = ROOT_DIR+'/images/test_order/'
 
 CONFIG_DIR = ROOT_DIR+'/config/dump_order/'
 
-COLORS = ['red', 'green', 'blue', 'yellow', 'magenta', 'cyan', 'white', 'black']
+COLORS = ['red', 'green', 'blue', 'magenta', 'cyan','yellow', 'green', 'cyan', 'magenta', 'cyan']
 
 publisher_centroid = rospy.Publisher("/pcl_centroids", MarkerArray, queue_size=100)
 publisher_maximum = rospy.Publisher("/pcl_maximum", MarkerArray, queue_size=100)
@@ -82,10 +82,11 @@ def set_names(marker_, label):
 def listener():
     
     # pcd = o3d.io.read_point_cloud(CONFIG_DIR+'colored_pcl.pcd')
-    for file in os.listdir(CONFIG_DIR):
-        if file.endswith(".pkl"):
-            with open(CONFIG_DIR+file, 'rb') as f:
-                detections = pickle.load(f)
+
+    with open(CONFIG_DIR+"detection.pkl", 'rb') as f:
+        detections = pickle.load(f)
+
+    print(detections.keys())
 
     trans = tf_buffer.lookup_transform("xtion_rgb_optical_frame", "map",  rospy.Time(0), rospy.Duration(2.0))
     Rx2m, Tx2m = get_R_and_T(trans)
@@ -106,8 +107,12 @@ def listener():
         for point in list_points:
             if np.linalg.norm(point - centroid) < 100:
                 new_list.append(point)
-
-        new_centroid = np.mean(new_list, axis=0)
+        
+        if new_list == []:
+            new_centroid = centroid
+            new_list = list_points
+        else:
+            new_centroid = np.mean(new_list, axis=0)
         label = detections[id]['label']
         new_marker = set_marker(new_centroid, COLORS[id_color], id, Rx2m, Tx2m)
         array_centroids.markers.append(new_marker)

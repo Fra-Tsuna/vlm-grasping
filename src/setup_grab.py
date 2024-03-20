@@ -56,7 +56,8 @@ def listener():
     # wp2 = [0.35]+wp2
 
 
-    new_wp1 = list(np.array([52, -25, -114, 126, 92, 72, 49])*np.pi/180)
+    # new_wp1 = list(np.array([52, -25, -114, 126, 92, 72, 49])*np.pi/180)
+    new_wp1 = list(np.array([42, 16, -109, 105, -60, -56, -108])*np.pi/180)
     new_wp1 = [0.35]+new_wp1
 
     arm_group.go(new_wp1, wait=True)

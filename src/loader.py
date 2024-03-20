@@ -1,33 +1,39 @@
 import os
 import time
 from models import YOLOW, VitSam
-
 import spacy
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import gensim.downloader as api
 
+from paths import *
+
 class Loader:
     _instance = None
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args):
         if not cls._instance:
             cls._instance = super(Loader, cls).__new__(cls)
-            cls._instance.initialize(*args, **kwargs)
+            cls._instance.initialize(*args)
         return cls._instance
 
-    def initialize(self):
-        self._CONFIG = os.path.join(os.getcwd(),"config/")
-        self._IMAGES = os.path.join(os.getcwd(),"images/")
-        self._AGENTS = os.path.join(os.getcwd(),"config/agents/")
+    def initialize(self, *args):
+        use_case = args[0]
+        self._use_case = use_case
+
+        self._CONFIG = CONFIG_DIR
+        self._IMAGES = IMAGES_DIR
+        self._OUTPUT = OUTPUT_DIR
 
         self._YOLOW_PATH = self._CONFIG + "yolow/"
         self._ENCODER_PATH = self._CONFIG + "efficientvitsam/l2_encoder.onnx"
         self._DECODER_PATH = self._CONFIG + "efficientvitsam/l2_decoder.onnx"
 
-        self._IMAGE_DIR = self._IMAGES + "test_order/"
-
-        self._DUMP = self._CONFIG + "dump_order/"
+        self._SCAN_DIR = self._IMAGES + use_case + '/'
+        os.makedirs(self._SCAN_DIR, exist_ok=True)
+        self._DUMP_DIR = self._OUTPUT + use_case + '/'
+        os.makedirs(self._DUMP_DIR, exist_ok=True)
+        self._MASKED_SCANS_DIR = self
 
         self._yolow_model = YOLOW(self._YOLOW_PATH)
         self._vit_sam_model = VitSam(self._ENCODER_PATH, self._DECODER_PATH) 
@@ -108,26 +114,33 @@ class Loader:
         self._DECODER_PATH = value
     
     @property
-    def IMAGE_DIR(self):
-        return self._IMAGE_DIR
+    def SCAN_DIR(self):
+        return self._SCAN_DIR
     
-    @IMAGE_DIR.setter
-    def IMAGE_DIR(self, value):
-        self._IMAGE_DIR = value
-    
-    @property
-    def DUMP(self):
-        return self._DUMP
-    
-    @DUMP.setter
-    def DUMP(self, value):
-        self._DUMP = value
+    @SCAN_DIR.setter
+    def SCAN_DIR(self, value):
+        self._SCAN_DIR = value
     
     @property
-    def AGENTS(self):
-        return self._AGENTS
+    def DUMP_DIR(self):
+        return self._DUMP_DIR
     
-    @AGENTS.setter
-    def AGENTS(self, value):
-        self._AGENTS = value
+    @DUMP_DIR.setter
+    def DUMP_DIR(self, value):
+        self._DUMP_DIR = value
     
+    @property
+    def OUTPUT(self):
+        return self._OUTPUT
+    
+    @OUTPUT.setter
+    def OUTPUT(self, value):
+        self._OUTPUT = value
+    
+    @property
+    def use_case(self):
+        return self._use_case
+    
+    @use_case.setter
+    def use_case(self, value):
+        self._use_case = value

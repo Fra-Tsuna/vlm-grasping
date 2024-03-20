@@ -16,17 +16,35 @@ class Agents:
                 "content": [
                     {
                     "type": "text",
-                        "text":"You are a robot with a base with wheels that allow you to move around the environment.\n\
-                        You know how it is made the scene by the image. \n\
-                        You have a robotic arm with a gripper that allows you to pick up and place one object at time.\n\
-                        For the task given in input you should plan a sequence of actions to solve the following task "+ self.task_description+"\n\
-                        For the plan you can use the following actions: \n\
-                            MOVE : for the movement of arm, you must specify the direction of the movement , for example move in left direction or right direction and nothing more\n\
-                            GRAB : for the action of picking up an object,specify the object \n\
-                            PLACE : for the action of placing an object and specify where\n\
-                            APPROACH : for the action of moving the robot to a specific object \n\
+                       "text":"You are a mobile robot with a base allow you to move around the environment.\n\
+                            You have a robotic arm with a gripper that allows you to pick up and place one object at time.\n\
+                            You are also very capable in describing a scene provided an image in input.\n\
+                            From the image, you need to produce in the output a set of relations in the in the form of a triple (subject, relation, object). \n\
+                            Write just the triples that are essential to solve the following task: " + self.task_description + "\n\
+                            Use specific relation to describe the position of the objects in the scene. Do not use 'next to' but you must \
+                            use 'right to', 'left to', 'behind to', 'beside to', 'on'\n\
+                            For example, if in a scene there is a door, a table in front of the door and a book on the table \
+                            with a pen right to it, your answer should be: \
+                            1) (table, in front of, door) \n\
+                            2) (book, on, table) \n\
+                            3) (pen, on, table) \n\
+                            4) (pen, right to, book). \n\
+                            For the same task given in input you, should plan a sequence of actions to solve the task.\n\
+                            Use univocal name given in the relations of the environment to specify the object.\n\
+                            Work as a Markovian agent, so you can only see the last action and the current state of the environment.\n\
+                            After each step, update the state of the environment to elaborate the next step execuable in the updated enviroment.\
+                            You must use only the following actions for the plan and nothing else: \n\
+                            NAVIGATE : for the movement in the scene towards a point far from you, for example 'NAVIGATE to the table'\n\
+                            GRAB : for the action of picking up an object and specifying which object to grab, for example 'GRAB bottle'\n\
+                            DROP : for the action of placing an object ,specifying where with respect to another object, for example 'DROP bottle left to mug' or 'DROP mug right to bottle' or 'DROP pen into bag'\n\
+                            PULL : for the action of pulling an object with the gripper,\n\
                             PUSH: for the action of pushing an object on the ground with the base to free its trajectory if necessary.\n\
-                            Work as an markovian agent, so you can only see the last action and the current state of the environment.\n"},
+                            Write only the actions for the plan and nothing else\n\
+                            The output should be in this format:\n\
+                            '***RELATIONS***\n\
+                            set of relations obtained\n\
+                            ***PLAN***\n\
+                            set of steps to achieve the task\n'"},
                     {
                     "type": "image_url",
                     "image_url": {
@@ -138,26 +156,14 @@ class Agents:
         {"role": "user", "content": 
             "The task is " + self.task_description+"\n\
                 You must use only the following actions for the plan and nothing else: \n\
-                MOVE : for the movement of arm, you must specify the direction of the movement , for example move in left direction or right direction and nothing more\n\
-                GRAB : for the action of picking up an object and specifying which object to grab \n\
-                DROP : for the action of placing an object and specify what and where\n\
-                PULL : for the action of pulling an object with the gripper, specify what object and where\n\
-                PUSH: for the action of pushing an object on the ground with the base to free its trajectory if necessary.\n\
-                Write only the actions for the plan and nothing else\n"},
+                            NAVIGATE : for the movement in the scene towards a point far from you, for example 'NAVIGATE to the table'\n\
+                            GRAB : for the action of picking up an object and specifying which object to grab, for example 'GRAB bottle'\n\
+                            DROP : for the action of placing an object ,specifying where with respect to another object, for example 'DROP bottle left to mug' or 'DROP mug right to bottle' or 'DROP pen into bag'\n\
+                            PULL : for the action of pulling an object with the gripper,\n\
+                            PUSH: for the action of pushing an object on the ground with the base to free its trajectory if necessary.\n\
+                            Write only the actions for the plan and nothing else"},
         ],
         temperature=0,
         max_tokens=600,
         )
         return enviroment_info,description_agent_info, agent.choices[0].message.content
-        
-
-
-        # MOVE: used to specify the movement of the arm in one direction like right or left; \n\
-        # GRAB: used to specify the action of picking up an object; \n\
-        # DROP: used to specify the action of dropping an object into a location; \n\
-        # PULL: used to specify the action of pulling an object with the gripper; \n\
-        # PUSH: used to specify the action of pushing an object with the robot base. \n\
-
-         
-#APPROACH : for the movement of the base you must specify the direction of the movement \n\
-

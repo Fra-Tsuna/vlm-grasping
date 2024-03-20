@@ -11,25 +11,24 @@ import cPickle as pickle  # For Python 2.x
 from open3d_ros_helper import open3d_ros_helper as orh
 import open3d as o3d
 import cv2
-import io
-import base64
 import os
 import time
 import tf2_ros
 import tf2_py as tf2
+
+from paths import IMAGES_DIR, OUTPUT_DIR
 
 rospy.init_node('image_processing', anonymous=True)
 bridge = CvBridge()
 tf_buffer = tf2_ros.Buffer()
 tf_listener = tf2_ros.TransformListener(tf_buffer)
 
-ROOT_DIR = os.path.abspath(__file__+'/../..')
-SCAN_DIR = ROOT_DIR+'/images/test_order/'
+USE_CASE = rospy.get_param('/use_case')
 
-CONFIG_DIR = ROOT_DIR+'/config/dump_order/'
+SCAN_DIR = IMAGES_DIR+USE_CASE+'/'
+DUMP_DIR = OUTPUT_DIR+USE_CASE+'/'
 
 def depth_image_to_point_cloud(depth_image, camera_intrinsics):
-
     height, width = depth_image.shape
     points = []
 
@@ -45,11 +44,11 @@ def depth_image_to_point_cloud(depth_image, camera_intrinsics):
 
 
 def listener():
+    start = time.time()
     msg_img = rospy.wait_for_message("/xtion/rgb/image_rect_color", Image)
     img = bridge.imgmsg_to_cv2(msg_img, "bgr8")
-    img_path = SCAN_DIR+"{type}.jpg".format(**{"type": "rgb"})
+    img_path = SCAN_DIR+'scan.jpg'
     cv2.imwrite(img_path, img)
-    # print("quo")
 
     msg_img_g = rospy.wait_for_message("/xtion/depth/image_raw", Image)
     camera_info = rospy.wait_for_message("/xtion/depth/camera_info", CameraInfo)
@@ -59,7 +58,6 @@ def listener():
     fy = proj_matrix[4]
     cx = proj_matrix[2]
     cy = proj_matrix[5]
-
 
     camera_intrinsics = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
 
@@ -72,8 +70,10 @@ def listener():
 
     pcd.transform(np.array([[1,0,0,0],[0,-1,0,0],[0,0,-1,0],[0,0,0,1]]))
   
-    o3d.visualization.draw_geometries([pcd])
-    o3d.io.write_point_cloud(CONFIG_DIR+"test_pcl.pcd", pcd)
+    if not os.path.exists(DUMP_DIR):
+        os.mkdir(DUMP_DIR)
+    o3d.io.write_point_cloud(DUMP_DIR+"depth_pointcloud.pcd", pcd)
+    # o3d.visualization.draw_geometries([pcd])
 
 if __name__ == '__main__':
     listener()

@@ -19,12 +19,14 @@ import rospy
 
 from matplotlib.colors import to_rgb
 
-ROOT_DIR = os.path.abspath(__file__+'/../..')
-SCAN_DIR = ROOT_DIR+'/images/test_order/'
+from paths import *
 
-CONFIG_DIR = ROOT_DIR+'/config/dump_order/'
+USE_CASE = rospy.get_param('/use_case')
 
-COLORS = ['red', 'green', 'blue', 'magenta', 'cyan','yellow', 'green', 'cyan', 'magenta', 'cyan']
+SCAN_DIR = IMAGES_DIR+USE_CASE+'/'
+DUMP_DIR = OUTPUT_DIR+USE_CASE+'/'
+
+COLORS = ['red', 'green', 'blue', 'magenta', 'cyan', 'yellow']*3
 
 def rgb_to_bgr(rgb_color):
     r, g, b = rgb_color
@@ -32,16 +34,16 @@ def rgb_to_bgr(rgb_color):
 
 def listener():
 
-    pcd = o3d.io.read_point_cloud(CONFIG_DIR+'test_pcl.pcd')
+    pcd = o3d.io.read_point_cloud(DUMP_DIR+"depth_pointcloud.pcd")
 
     pcd.colors = o3d.utility.Vector3dVector(np.tile(to_rgb('gray'), (len(pcd.points), 1)))
 
-    image = cv2.imread(SCAN_DIR+'rgb.jpg')
+    image = cv2.imread(SCAN_DIR+'scan.jpg')
     h, w, _ = image.shape
 
     masks = []
     masks_flipped = []
-    with open(CONFIG_DIR+"detection.pkl", 'rb') as f:
+    with open(DUMP_DIR+"detection.pkl", 'rb') as f:
         detections = pickle.load(f)
 
     for key in detections.keys():
@@ -79,12 +81,12 @@ def listener():
                     pcd.colors[idx] = [int(color*255) for color in to_rgb(COLORS[id_color])]   
                     colors_dict[id_color].append(point)              
 
-    cv2.imwrite(CONFIG_DIR+'boh.png', image)
+    cv2.imwrite(DUMP_DIR+'colored_image.png', image)
 
     o3d.visualization.draw_geometries([pcd])
 
-    o3d.io.write_point_cloud(CONFIG_DIR+'colored_pcl.pcd', pcd)
-    with open(CONFIG_DIR+'dict/colors_dict.pkl', 'wb') as f:
+    o3d.io.write_point_cloud(DUMP_DIR+'colored_pcl.pcd', pcd)
+    with open(DUMP_DIR+'colors_dict.pkl', 'wb') as f:
         pickle.dump(colors_dict, f)
     return
 

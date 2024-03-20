@@ -47,25 +47,30 @@ def open_grippers(gripper):
 def grab(group, gripper, object):
     init_pose = group.get_current_pose().pose
     print(init_pose)
-    
     wp1 = copy.deepcopy(init_pose)
     wp1.position.z = object.pose.position.z
-    wp2 = copy.deepcopy(wp1)
-    wp2.position.y = object.pose.position.y
+    wp1.position.y = object.pose.position.y 
+    # wp2.position.x = object.pose.position.x 
+    wp3 = copy.deepcopy(wp1)
+    wp3.position.x = object.pose.position.x 
 
-    pose = Pose()
-    pose.position.x = object.pose.position.x - GRIPPER_OFFSET
-    pose.position.y = object.pose.position.y
-    pose.position.z = object.pose.position.z
-    pose.orientation = GRABBING_QUATERNION
-    wp3 = pose
+    # pose = Pose()
+    # pose.position.x = object.pose.position.x - GRIPPER_OFFSET
+    # pose.position.y = object.pose.position.y
+    # pose.position.z = object.pose.position.z
+    # pose.orientation = GRABBING_QUATERNION
+    # wp3 = pose
+    # print(wp3)
 
-    waypoints = [wp1, wp2, wp3]
-    reversed_waypoints = [wp2, wp1, init_pose]
+    # waypoints = [wp1]
+    print(object.pose)
+    waypoints = [wp1,wp3]
+    # reversed_waypoints = [wp1, init_pose]
+    reversed_waypoints = [wp1, init_pose]
     
     reach_waypoints(group, waypoints)
     close_grippers(gripper)
-    #reach_waypoints(group, reversed_waypoints)
+    reach_waypoints(group, reversed_waypoints)
     
 
 def drop(group, gripper, goal_pose):
@@ -73,18 +78,22 @@ def drop(group, gripper, goal_pose):
     
     wp1 = copy.deepcopy(init_pose)
     wp1.position.z = goal_pose.pose.position.z
-    wp2 = copy.deepcopy(wp1)
-    wp2.position.y = goal_pose.pose.position.y
+    wp1.position.y = goal_pose.pose.position.y 
 
-    pose = Pose()
-    pose.position.x = goal_pose.pose.position.x - GRIPPER_OFFSET
-    pose.position.y = goal_pose.pose.position.y
-    pose.position.z = goal_pose.pose.position.z
-    pose.orientation = GRABBING_QUATERNION
-    wp3 = pose
+    wp3 = copy.deepcopy(wp1)
+    wp3.position.x = goal_pose.pose.position.x 
+    #wp2.position.x = goal_pose.pose.position.x 
 
-    waypoints = [wp1, wp2, wp3]
-    reversed_waypoints = [wp2, wp1, init_pose]
+
+    # pose = Pose()
+    # pose.position.x = goal_pose.pose.position.x - GRIPPER_OFFSET
+    # pose.position.y = goal_pose.pose.position.y
+    # pose.position.z = goal_pose.pose.position.z
+    # pose.orientation = GRABBING_QUATERNION
+    # wp3 = pose
+
+    waypoints = [wp1,wp3]
+    reversed_waypoints = [ wp1, init_pose]
     
     reach_waypoints(group, waypoints)
     open_grippers(gripper)

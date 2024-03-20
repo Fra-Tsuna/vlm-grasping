@@ -1,0 +1,12 @@
+NAVIGATE to the top shelf
+GRAB trophy
+NAVIGATE to the middle shelf
+DROP trophy right to toolbox
+NAVIGATE to the bottom shelf
+GRAB paper bag
+NAVIGATE to the top shelf
+DROP paper bag right to soccer ball
+NAVIGATE to the top shelf
+GRAB can
+NAVIGATE to the bottom shelf
+DROP can right to paper bag

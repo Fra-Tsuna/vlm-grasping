@@ -62,10 +62,8 @@ def listener():
     cup = None
     can = None
     for name, marker in zip(name_list.markers, centroid_list.markers):
-        if name.text == ' soda':
+        if name.text == ' trophy':
             can = copy.deepcopy(marker)
-        if name.text == ' cup':
-            cup = copy.deepcopy(marker)
 
     cup_array = np.array([cup.pose.position.x, cup.pose.position.y, cup.pose.position.z])
     cup_array = np.dot(np.transpose(R_m2b), cup_array-T_m2b)
@@ -86,14 +84,14 @@ def listener():
     arm_group = moveit_commander.MoveGroupCommander("arm")
     gripper = moveit_commander.MoveGroupCommander("gripper")
 
-    grab(arm_group, gripper, cup)
+    grab(arm_torso_group, gripper, cup)
     goal_cup_pose = copy.deepcopy(cup)
     goal_cup_pose.pose.position.y -= 0.3
-    drop(arm_group, gripper, goal_cup_pose)
-    grab(arm_group, gripper, can)
+    drop(arm_torso_group, gripper, goal_cup_pose)
+    grab(arm_torso_group, gripper, can)
     goal_can_pose = copy.deepcopy(can)
     goal_can_pose.pose.position.y += 0.15
-    drop(arm_group, gripper, goal_can_pose)
+    drop(arm_torso_group, gripper, goal_can_pose)
 
 
 if __name__ == '__main__':

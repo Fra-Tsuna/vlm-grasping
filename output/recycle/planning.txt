@@ -1,0 +1,8 @@
+NAVIGATE to the table
+GRAB paper ball
+NAVIGATE to the recycling bin for paper
+DROP paper ball into recycling bin for paper
+NAVIGATE to the table
+GRAB can
+NAVIGATE to the recycling bin for plastic and metal
+DROP can into recycling bin for plastic and metal

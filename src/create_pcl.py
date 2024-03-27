@@ -73,6 +73,8 @@ def listener():
     if not os.path.exists(DUMP_DIR):
         os.mkdir(DUMP_DIR)
     o3d.io.write_point_cloud(DUMP_DIR+"depth_pointcloud.pcd", pcd)
+    
+    # UNCOMMENT TO VISUALIZE PCD
     # o3d.visualization.draw_geometries([pcd])
 
 if __name__ == '__main__':

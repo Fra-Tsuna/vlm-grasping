@@ -35,9 +35,8 @@ class Detection:
 
         agents = Agents(encoded_image, self.task_dict[use_case])
         # self.single_agent_info = agents.single_agent() 
-        '''
+
         environment_agent_info, description_agent_info, planning_agent_info = agents.multi_agent_vision_planning()
-        print(self.loader_instance.DUMP_DIR)
 
         self.results_multi = {
             "environment_agent_info": environment_agent_info,
@@ -50,10 +49,6 @@ class Detection:
         
         with open(self.loader_instance.DUMP_DIR+"planning.txt",'w') as f:
             f.write(self.results_multi["planning_agent_info"])
-        '''
-        with open(self.loader_instance.DUMP_DIR+"planning.pkl",'rb') as f:
-             self.results_multi = pickle.load(f)
-
 
 
     def set_loader(self,loader_instance):
@@ -161,6 +156,7 @@ class Detection:
     def compare_two_list_of_objects(self,position_in_image_first,position_in_image_second,relation,object_first,object_second):
         if position_in_image_first == {} or position_in_image_second == {}:
             return
+    
         if "on" in relation:
             min_distance_x = 30000
             for key_first in position_in_image_first.keys():
@@ -168,14 +164,13 @@ class Detection:
                     dis_x = abs(position_in_image_first[key_first]['x'] - position_in_image_second[key_second]['x'])
                     dis_y = abs(position_in_image_first[key_first]['y'] - position_in_image_second[key_second]['y'])
                     distance = math.sqrt((dis_x*dis_x + dis_y*dis_y))
-                    if min_distance_x > distance:
+                    if min_distance_x > dis_y:
                         index_first = key_first
                         index_second = key_second
                         min_distance_x = distance
 
             self.data_reordered[index_first]['label'] = object_first
             self.data_reordered[index_second]['label'] = object_second
-            # print(index_first)
        
         if "left" in relation:
             min_distance_x = 30000
@@ -184,12 +179,12 @@ class Detection:
                 for key_second in position_in_image_second.keys():
                     min_distance_x_bb = abs(position_in_image_first[key_first]['x'] - position_in_image_second[key_second]['x'])//2
                     min_distance_y_bb = abs(position_in_image_first[key_first]['y'] - position_in_image_second[key_second]['y'])//2
-                    if min_distance_x_bb < min_distance_x and min_distance_x_bb != 0 and min_distance_y > min_distance_y_bb and min_distance_y_bb != 0:
-
+                    if min_distance_x_bb < min_distance_x and min_distance_x_bb != 0 and min_distance_y > min_distance_y_bb :
                         index_first = key_first
                         index_second = key_second
                         min_distance_x = min_distance_x_bb
                         min_distance_y = min_distance_y_bb
+
             self.data_reordered[index_first]['label'] = object_first
             self.data_reordered[index_second]['label'] = object_second
             self.dict_detections.pop(index_first)
@@ -215,18 +210,7 @@ class Detection:
 
         
 
-    def obtain_bb_grounded(self,rel,index_first,index_second,relation,object_first,object_second):
-        if rel:
-            # print("red")
-            print(index_first)
-            print(object_first)
-            print(index_second)
-            print(object_second)
-            self.data_reordered[4]['label'] = object_first
-            self.data_reordered[10]['label'] = object_second
-            self.dict_detections.pop(4)
-            self.dict_detections.pop(10)
-        else:
+    def obtain_bb_grounded(self,index_first,index_second,relation,object_first,object_second):
             detection_data = self.dict_detections
             position_in_image_first = {}
             position_in_image_second = {}
@@ -271,7 +255,7 @@ class Detection:
         for i, (bbox,score,cls_id) in enumerate(zip(bboxs[0], scores, labels_idx[0])):
             x1,y1,x2,y2 = bbox
 
-            if score > 0.03:
+            if score > 0.1:
 
                 label = self.loader_instance.yolow_model.get_class_name(cls_id)
                 masks, _ = self.loader_instance.vit_sam_model(masked_image, bbox)
@@ -301,6 +285,7 @@ class Detection:
         # start = time.time()
         for relation in object_relations:
                 relation = relation.replace("(", "")
+
                 relation_object_first = relation.split(")")[1].split(",")[0]
                 relation_object_first = relation_object_first[1:]
                 relation_type = relation.split(")")[1].split(",")[1]
@@ -310,22 +295,15 @@ class Detection:
                 index_bounding_box_first = self.find_bb_relation(relation_object_first)
                 index_bounding_box_second = self.find_bb_relation(relation_object_second)
                 if index_bounding_box_first != [] or index_bounding_box_second != []:
-                    # if "toolbox" in relation:
-                    #     print(relation)
-                    #     self.obtain_bb_grounded(True,index_bounding_box_first,index_bounding_box_second,relation_type,relation_object_first,relation_object_second)
-                    # else:
-                    self.obtain_bb_grounded(False,index_bounding_box_first,index_bounding_box_second,relation_type,relation_object_first,relation_object_second)
+                    self.obtain_bb_grounded(index_bounding_box_first,index_bounding_box_second,relation_type,relation_object_first,relation_object_second)
 
-        print("quo")
         # print("grounfing : " + str(time.time() -start))
         for i, value in self.data_reordered.items():
             cv2.rectangle(image_with_bbox, (int(value['bbox'][0]), int(value['bbox'][1])), (int(value['bbox'][2]), int(value['bbox'][3])), (255, 0, 0), 1 )
             cv2.putText(image_with_bbox, value['label'], (int(value['bbox'][0]+10), int(value['bbox'][1]+20)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
-        print("qua")
         with open(self.loader_instance.DUMP_DIR+"detection.pkl", 'wb') as f:
             pickle.dump(self.data_reordered, f, protocol=2)
         
-        print("qui")
         cv2.imwrite(self.loader_instance.DUMP_DIR+"scan_with_bb.jpg", image_with_bbox)
         os.system(f'rm -rf {self.loader_instance.YOLOW_PATH}/logs/')

@@ -17,7 +17,7 @@ import moveit_msgs.msg
 import tf2_ros
 import tf2_py as tf2
 import pickle
-from low_level_actions import *
+from primitive_actions import *
 
 ROOT_DIR = os.path.abspath(__file__+'/../..')
 SCAN_DIR = ROOT_DIR+'/images/test_order/'
@@ -62,13 +62,15 @@ def listener():
     cup = None
     can = None
     for name, marker in zip(name_list.markers, centroid_list.markers):
-        if name.text == ' trophy':
+        if name.text == 'cup':
+            cup = copy.deepcopy(marker)
+        if name.text == 'can':
             can = copy.deepcopy(marker)
 
     cup_array = np.array([cup.pose.position.x, cup.pose.position.y, cup.pose.position.z])
     cup_array = np.dot(np.transpose(R_m2b), cup_array-T_m2b)
-    cup.pose.position.x = cup_array[0]
-    cup.pose.position.y = cup_array[1]
+    cup.pose.position.x = cup_array[0] +0.05
+    cup.pose.position.y = cup_array[1] +0.05
     cup.pose.position.z = cup_array[2]
 
     can_array = np.array([can.pose.position.x, can.pose.position.y, can.pose.position.z])
@@ -76,6 +78,8 @@ def listener():
     can.pose.position.x = can_array[0]
     can.pose.position.y = can_array[1]
     can.pose.position.z = can_array[2]
+
+
 
     moveit_commander.roscpp_initialize(sys.argv) 
     scene = moveit_commander.PlanningSceneInterface()
@@ -86,12 +90,10 @@ def listener():
 
     grab(arm_torso_group, gripper, cup)
     goal_cup_pose = copy.deepcopy(cup)
-    goal_cup_pose.pose.position.y -= 0.3
+    goal_cup_pose.pose.position.y = can.pose.position.y -0.15
+    goal_cup_pose.pose.position.x += 0.08
+    goal_cup_pose.pose.position.z += 0.03
     drop(arm_torso_group, gripper, goal_cup_pose)
-    grab(arm_torso_group, gripper, can)
-    goal_can_pose = copy.deepcopy(can)
-    goal_can_pose.pose.position.y += 0.15
-    drop(arm_torso_group, gripper, goal_can_pose)
 
 
 if __name__ == '__main__':

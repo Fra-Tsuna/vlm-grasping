@@ -17,7 +17,7 @@ import moveit_msgs.msg
 import tf2_ros
 import tf2_py as tf2
 import pickle
-from low_level_actions import *
+from primitive_actions import *
 
 ROOT_DIR = os.path.abspath(__file__+'/../..')
 SCAN_DIR = ROOT_DIR+'/images/test_order/'
@@ -59,18 +59,16 @@ def listener():
     trans_base = tf_buffer.lookup_transform("map", "base_footprint",  rospy.Time(0), rospy.Duration(2.0))
     R_m2b, T_m2b = get_R_and_T(trans_base)
 
-    cup = None
-    can = None
+    jacket = None
     for name, marker in zip(name_list.markers, centroid_list.markers):
-        if name.text == ' black jacket':
+        if name.text == 'green jacket':
             jacket = copy.deepcopy(marker)
 
     jacket_array = np.array([jacket.pose.position.x, jacket.pose.position.y, jacket.pose.position.z])
     jacket_array = np.dot(np.transpose(R_m2b), jacket_array-T_m2b)
     jacket.pose.position.x = jacket_array[0]
-    jacket.pose.position.y = jacket_array[1]
-    jacket.pose.position.z = jacket_array[2] - 0.3
-    print(jacket)
+    jacket.pose.position.y = jacket_array[1] + 0.1
+    jacket.pose.position.z = jacket_array[2] -0.2
 
     moveit_commander.roscpp_initialize(sys.argv) 
     scene = moveit_commander.PlanningSceneInterface()
@@ -79,15 +77,11 @@ def listener():
     arm_group = moveit_commander.MoveGroupCommander("arm")
     gripper = moveit_commander.MoveGroupCommander("gripper")
 
+    back_init()
     grab(arm_group, gripper, jacket)
 
-    # goal_cup_pose = copy.deepcopy(cup)
-    # goal_cup_pose.pose.position.y -= 0.3
-    # drop(arm_group, gripper, goal_cup_pose)
-    #grab(arm_group, gripper, can)
-    #goal_can_pose = copy.deepcopy(can)
-    #goal_can_pose.pose.position.y += 0.15
-    #drop(arm_group, gripper, goal_can_pose)
+    #drop(arm_group, gripper, jacket)
+
 
 
 if __name__ == '__main__':

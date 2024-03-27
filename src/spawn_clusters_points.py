@@ -20,8 +20,6 @@ DUMP_DIR = OUTPUT_DIR+USE_CASE+'/'
 
 COLORS = ['red', 'green', 'blue', 'magenta', 'cyan', 'yellow']*3
 
-label_added = []
-
 publisher_centroid = rospy.Publisher("/pcl_centroids", MarkerArray, queue_size=100)
 publisher_maximum = rospy.Publisher("/pcl_maximum", MarkerArray, queue_size=100)
 publisher_names = rospy.Publisher("/pcl_names", MarkerArray, queue_size=100)
@@ -84,8 +82,6 @@ def set_names(marker_, label):
 
 def listener():
     
-    # pcd = o3d.io.read_point_cloud(CONFIG_DIR+'colored_pcl.pcd')
-
     with open(DUMP_DIR+"detection.pkl", 'rb') as f:
         detections = pickle.load(f)
 
@@ -114,15 +110,13 @@ def listener():
         else:
             new_centroid = np.mean(new_list, axis=0)
         label = detections[id]['label']
-        if label not in label_added:
-            label_added.append(label)
-            new_marker = set_marker(new_centroid, COLORS[id_color], id, Rx2m, Tx2m)
-            array_centroids.markers.append(new_marker)
-            max_point = np.max(new_list, axis=0)
-            array_maximum.markers.append(set_marker(max_point, COLORS[id_color], id, Rx2m, Tx2m))
-            array_name.markers.append(set_names(new_marker, label))
-            id += 1
 
+        new_marker = set_marker(new_centroid, COLORS[id_color], id, Rx2m, Tx2m)
+        array_centroids.markers.append(new_marker)
+        max_point = np.max(new_list, axis=0)
+        array_maximum.markers.append(set_marker(max_point, COLORS[id_color], id, Rx2m, Tx2m))
+        array_name.markers.append(set_names(new_marker, label))
+        id += 1
 
 
     while not rospy.is_shutdown():
@@ -142,3 +136,4 @@ if __name__ == '__main__':
     tf_listener = tf2_ros.TransformListener(tf_buffer)
 
     listener()
+

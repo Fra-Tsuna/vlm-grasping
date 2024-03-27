@@ -17,7 +17,7 @@ import moveit_msgs.msg
 import tf2_ros
 import tf2_py as tf2
 import pickle
-from low_level_actions import *
+from primitive_actions import *
 
 ROOT_DIR = os.path.abspath(__file__+'/../..')
 Strophy_DIR = ROOT_DIR+'/images/test_order/'
@@ -79,34 +79,34 @@ def listener():
 
     trophy_array = np.array([trophy.pose.position.x, trophy.pose.position.y, trophy.pose.position.z])
     trophy_array = np.dot(np.transpose(R_m2b), trophy_array-T_m2b)
-    trophy.pose.position.x = trophy_array[0]
-    trophy.pose.position.y = trophy_array[1] -0.15
-    trophy.pose.position.z = trophy_array[2] -0.03
+    trophy.pose.position.x = trophy_array[0] + 0.02
+    trophy.pose.position.y = trophy_array[1] + 0.07
+    trophy.pose.position.z = trophy_array[2] + 0.04
 
     cup_array = np.array([cup.pose.position.x, cup.pose.position.y, cup.pose.position.z])
     cup_array = np.dot(np.transpose(R_m2b), cup_array-T_m2b)
     cup.pose.position.x = cup_array[0] 
-    cup.pose.position.y = cup_array[1] - 0.07
-    cup.pose.position.z = cup_array[2]  + 0.05
+    cup.pose.position.y = cup_array[1] +0.05
+    cup.pose.position.z = cup_array[2]  +0.05
 
 
     middle_shelf_array = np.array([middle_shelf.pose.position.x, middle_shelf.pose.position.y, middle_shelf.pose.position.z])
     middle_shelf_array = np.dot(np.transpose(R_m2b), middle_shelf_array-T_m2b)
     middle_shelf.pose.position.x = middle_shelf_array[0]
-    middle_shelf.pose.position.y = middle_shelf_array[1] - 0.21
-    middle_shelf.pose.position.z = middle_shelf_array[2] + 0.18
+    middle_shelf.pose.position.y = middle_shelf_array[1] + 0.09
+    middle_shelf.pose.position.z = middle_shelf_array[2] +0.2
 
     bottom_shelf_array = np.array([bottom_shelf.pose.position.x, bottom_shelf.pose.position.y, bottom_shelf.pose.position.z])
     bottom_shelf_array = np.dot(np.transpose(R_m2b), bottom_shelf_array-T_m2b)
     bottom_shelf.pose.position.x = bottom_shelf_array[0]
-    bottom_shelf.pose.position.y = bottom_shelf_array[1] - 0.01
-    bottom_shelf.pose.position.z = bottom_shelf_array[2] + 0.14
+    bottom_shelf.pose.position.y = bottom_shelf_array[1] 
+    bottom_shelf.pose.position.z = bottom_shelf_array[2] + 0.09
 
     top_shelf_array = np.array([top_shelf.pose.position.x, top_shelf.pose.position.y, top_shelf.pose.position.z])
     top_shelf_array = np.dot(np.transpose(R_m2b), top_shelf_array-T_m2b)
     top_shelf.pose.position.x = top_shelf_array[0]
-    top_shelf.pose.position.y = top_shelf_array[1]
-    top_shelf.pose.position.z = top_shelf_array[2]
+    top_shelf.pose.position.y = top_shelf_array[1] - 0.09
+    top_shelf.pose.position.z = top_shelf_array[2] 
 
     # bottom_shelf_array = np.array([bottom_shelf.pose.position.x, bottom_shelf.pose.position.y, bottom_shelf.pose.position.z])
     # bottom_shelf_array = np.dot(np.transpose(R_m2b), bottom_shelf_array-T_m2b)
@@ -126,7 +126,7 @@ def listener():
     #return_init(arm_group, gripper)
     grab(arm_group, gripper, trophy)
     
-    drop(arm_group, gripper, middle_shelf)
+    drop(arm_torso_group, gripper, middle_shelf)
 
     grab(arm_group, gripper, cup)
 

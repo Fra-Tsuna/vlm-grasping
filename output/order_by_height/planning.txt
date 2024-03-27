@@ -1,0 +1,5 @@
+NAVIGATE to the table
+GRAB cup
+DROP cup right to can
+GRAB tall box
+DROP tall box left to can

@@ -83,7 +83,8 @@ def listener():
 
     cv2.imwrite(DUMP_DIR+'colored_image.png', image)
 
-    o3d.visualization.draw_geometries([pcd])
+    # Uncomment to visualize pcd
+    # o3d.visualization.draw_geometries([pcd])
 
     o3d.io.write_point_cloud(DUMP_DIR+'colored_pcl.pcd', pcd)
     with open(DUMP_DIR+'colors_dict.pkl', 'wb') as f:

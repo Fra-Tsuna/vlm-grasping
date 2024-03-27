@@ -17,7 +17,7 @@ import moveit_msgs.msg
 import tf2_ros
 import tf2_py as tf2
 import pickle
-from low_level_actions import *
+from primitive_actions import *
 
 ROOT_DIR = os.path.abspath(__file__+'/../..')
 SCAN_DIR = ROOT_DIR+'/images/test_order/'
@@ -64,39 +64,38 @@ def listener():
     rb_paper = None
     rb_plastic = None
     for name, marker in zip(name_list.markers, centroid_list.markers):
-        if name.text == ' can':
+        if name.text == 'can':
             can = copy.deepcopy(marker)
-        if name.text == 'paper':
+        if name.text == 'crumpled paper':
             paper = copy.deepcopy(marker)
-        if name.text == ' recycling bin for paper':
+        if name.text == 'recycling bin for paper':
             rb_paper = copy.deepcopy(marker)
-        if name.text == ' recycling bin for plastic and metal':
+        if name.text == 'recycling bin for plastic and metal':
             rb_plastic = copy.deepcopy(marker)
 
     paper_array = np.array([paper.pose.position.x, paper.pose.position.y, paper.pose.position.z])
     paper_array = np.dot(np.transpose(R_m2b), paper_array-T_m2b)
     paper.pose.position.x = paper_array[0]
-    paper.pose.position.y = paper_array[1]
-    paper.pose.position.z = paper_array[2]
-    print(paper.pose)
+    paper.pose.position.y = paper_array[1] 
+    paper.pose.position.z = paper_array[2] +0.05
 
     can_array = np.array([can.pose.position.x, can.pose.position.y, can.pose.position.z])
     can_array = np.dot(np.transpose(R_m2b), can_array-T_m2b)
-    can.pose.position.x = can_array[0]
+    can.pose.position.x = can_array[0] 
     can.pose.position.y = can_array[1]
-    can.pose.position.z = can_array[2]
+    can.pose.position.z = can_array[2] +0.05
 
     rb_paper_array = np.array([rb_paper.pose.position.x, rb_paper.pose.position.y, rb_paper.pose.position.z])
     rb_paper_array = np.dot(np.transpose(R_m2b), rb_paper_array-T_m2b)
-    rb_paper.pose.position.x = rb_paper_array[0]
-    rb_paper.pose.position.y = rb_paper_array[1]
-    rb_paper.pose.position.z = rb_paper_array[2]
+    rb_paper.pose.position.x = rb_paper_array[0] 
+    rb_paper.pose.position.y = rb_paper_array[1] 
+    rb_paper.pose.position.z = rb_paper_array[2] +0.3
 
     rb_plastic_array = np.array([rb_plastic.pose.position.x, rb_plastic.pose.position.y, rb_plastic.pose.position.z])
     rb_plastic_array = np.dot(np.transpose(R_m2b), rb_plastic_array-T_m2b)
-    rb_plastic.pose.position.x = rb_plastic_array[0]
-    rb_plastic.pose.position.y = rb_plastic_array[1]
-    rb_plastic.pose.position.z = rb_plastic_array[2]
+    rb_plastic.pose.position.x = rb_plastic_array[0] 
+    rb_plastic.pose.position.y = rb_plastic_array[1] -0.2
+    rb_plastic.pose.position.z = rb_plastic_array[2] +0.3
 
     moveit_commander.roscpp_initialize(sys.argv) 
     scene = moveit_commander.PlanningSceneInterface()
@@ -106,15 +105,11 @@ def listener():
     gripper = moveit_commander.MoveGroupCommander("gripper")
 
     grab(arm_torso_group, gripper, paper)
-    goal_paper_pose = copy.deepcopy(rb_paper)
-    goal_paper_pose.pose.position.z += 0.3
-    drop(arm_torso_group, gripper, goal_paper_pose)
-
+    drop(arm_torso_group,gripper, rb_paper)
     grab(arm_torso_group, gripper, can)
-    goal_can_pose = copy.deepcopy(rb_plastic)
-    goal_can_pose.pose.position.z += 0.3
-    drop(arm_torso_group, gripper, goal_can_pose)
+    drop(arm_torso_group,gripper, rb_plastic)
 
+    #grab(arm_torso_group, gripper, can)
 
 if __name__ == '__main__':
     rospy.init_node('listener', anonymous=True)

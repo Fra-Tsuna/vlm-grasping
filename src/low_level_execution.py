@@ -7,8 +7,11 @@ import numpy as np
 import copy
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
+from pal_interaction_msgs.msg import TtsAction, TtsGoal
+from actionlib import SimpleActionClient
 import math
 from math import pi
+import spacy
 import rospy
 import sys
 from geometry_msgs.msg import Pose, Quaternion
@@ -28,6 +31,8 @@ rospy.init_node('listener', anonymous=True)
 tf_buffer = tf2_ros.Buffer()
 tf_listener = tf2_ros.TransformListener(tf_buffer)
 
+nlp = spacy.load('en_core_web_sm',disable=['ner','textcat'])
+
 def get_R_and_T(trans):
     Tx_base = trans.transform.translation.x
     Ty_base = trans.transform.translation.y
@@ -43,6 +48,14 @@ def get_R_and_T(trans):
     R = 2*np.array([[pow(qw,2) + pow(qx,2) - 0.5, qx*qy-qw*qz, qw*qy+qx*qz],[qw*qz+qx*qy, pow(qw,2) + pow(qy,2) - 0.5, qy*qz-qw*qx],[qx*qz-qw*qy, qw*qx+qy*qz, pow(qw,2) + pow(qz,2) - 0.5]])
     return R, T
 
+def say_phrase(phrase):
+    client = SimpleActionClient('/tts', TtsAction)
+    client.wait_for_server()
+    goal = TtsGoal()
+    goal.rawtext.text = phrase
+    goal.rawtext.lang_id = "en_GB"
+    client.send_goal_and_wait(goal)
+
 def extract_labels_per_step(plan):
 
     labels = []
@@ -54,6 +67,16 @@ def extract_labels_per_step(plan):
 
     return labels
 
+def apply_direction_to_goal(goal_pose, direction):
+
+    if direction == 'right':
+        goal_pose.pose.position.y += 0.3
+    elif direction == 'left':
+        goal_pose.pose.position.y -= 0.3
+    elif direction == 'up':
+        goal_pose.pose.position.z += 0.3
+
+    return goal_pose
 
 def listener():
     centroid_list = rospy.wait_for_message("/pcl_centroids", MarkerArray)
@@ -90,6 +113,7 @@ def listener():
     back_init()
 
     for step in plan:
+        say_phrase(step)
         command = step.split(' ')[0]
         labels = extract_labels_per_step(step)
         
@@ -98,10 +122,19 @@ def listener():
                 if label in objects_dict.keys():
                     grab(arm_torso_group, gripper, objects_dict[label])
                     break
-            
         
         elif command == 'DROP':
-            ...
+            goal = None
+            for label in labels:
+                if label in objects_dict.keys():
+                    goal = objects_dict[label]
+
+            for direction in ['right', 'left', 'on']:
+                if direction in labels:
+                    goal = apply_direction_to_goal(goal, direction)
+                    break
+
+            drop(arm_torso_group, gripper, goal)
         
         elif command == 'PUSH':
             ...
@@ -113,22 +146,6 @@ def listener():
             ...
         
         back_init()
-            
-
-
-
-    # back_init()
-    # grab(arm_torso_group, gripper, cup)
-    # drop(arm_torso_group,gripper,bottom_shelf)
-    # back_init()
-    # grab(arm_torso_group,gripper,ball)
-    # drop(arm_torso_group,gripper,middle_shelf)
-    # back_init()
-    # grab(arm_torso_group,gripper,trophy)
-    # drop(arm_torso_group,gripper,trophy)
-
-
-    # #return_init(arm_group, gripper)
 
 
 

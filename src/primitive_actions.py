@@ -5,15 +5,19 @@ import os
 import numpy as np
 import copy
 import math
+import time
 from math import pi
 import rospy
 import sys
 from geometry_msgs.msg import Pose, Quaternion
+from geometry_msgs.msg import Twist
 import moveit_commander
 import moveit_msgs.msg
 import tf2_ros
 import tf2_py as tf2
 import pickle
+
+move_base_publisher = rospy.Publisher('/mobile_base_controller/cmd_vel')
 
 # GRABBING_QUATERNION =  Quaternion(-0.528,0.412,0.473,0.571)
 GRABBING_QUATERNION = Quaternion(-0.742818371853,-0.0634568007104,0.0418472405416,0.665163821431)
@@ -101,7 +105,7 @@ def grab(group, gripper, goal_pose):
     reversed_waypoints = [init_pose]
     
     reach_waypoints(group, waypoints)
-    open_grippers(gripper)
+    close_grippers(gripper)
     reach_waypoints(group, reversed_waypoints) 
 
 def drop(group, gripper, goal_pose):
@@ -128,4 +132,28 @@ def navigate(group, gripper, goal_pose):
     pass
 
 def pull(group, gripper, goal_pose):
-    pass
+    init_pose = group.get_current_pose().pose
+    
+    wp1 = copy.deepcopy(init_pose)
+    wp1.position.z = goal_pose.position.z
+    wp1.position.y = goal_pose.position.y
+
+    wp2 = copy.deepcopy(wp1)
+
+    wp2.position.x = goal_pose.position.x
+
+    wp1.orientation = GRABBING_QUATERNION
+    wp2.orientation = GRABBING_QUATERNION
+
+    waypoints = [wp1]
+    reversed_waypoints = [init_pose]
+    
+    reach_waypoints(group, waypoints)
+    close_grippers(gripper)
+
+    velocity = Twist()
+    velocity.linear.x = -0.3
+
+    start = time.time()
+    while (time.time()-start)<=1:
+        move_base_publisher.publish(velocity)

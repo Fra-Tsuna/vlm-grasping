@@ -16,6 +16,8 @@ import moveit_msgs.msg
 import tf2_ros
 import tf2_py as tf2
 import pickle
+import actionlib
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
 move_base_publisher = rospy.Publisher('/mobile_base_controller/cmd_vel')
 
@@ -126,10 +128,45 @@ def drop(group, gripper, goal_pose):
     reach_waypoints(group, reversed_waypoints)
 
 def push(group, gripper, goal_pose):
+    init_pose = group.get_current_pose().pose
+    current_position = init_pose.position
+    current_orientation = init_pose.orientation
+    client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
+    client.wait_for_server()
+
+    goal = MoveBaseGoal()
+    goal.target_pose.header.frame_id = "base_link"
+    goal.target_pose.header.stamp = rospy.Time.now()
+    goal.target_pose.pose.position = current_position
+    goal.target_pose.pose.positon.x += 2
+    goal.target_pose.pose.orientation = current_orientation
+
+    client.send_goal(goal)
+    wait = client.wait_for_result()
+    if not wait:
+        rospy.logerr("Action server not available!")
+        rospy.signal_shutdown("Action server not available!")
     pass
 
 def navigate(group, gripper, goal_pose):
-    pass
+    init_pose = group.get_current_pose().pose
+    current_orientation = init_pose.orientation
+    client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
+    client.wait_for_server()
+
+    goal = MoveBaseGoal()
+    goal.target_pose.header.frame_id = "map"
+    goal.target_pose.header.stamp = rospy.Time.now()
+    goal.target_pose.pose.position.x = goal_pose.position.x-0.3
+    goal.target_pose.pose.position.y = goal_pose.position.y-0.3
+    goal.target_pose.pose.position.z = goal_pose.position.z
+    goal.target_pose.pose.orientation = current_orientation
+
+    client.send_goal(goal)
+    wait = client.wait_for_result()
+    if not wait:
+        rospy.logerr("Action server not available!")
+        rospy.signal_shutdown("Action server not available!")
 
 def pull(group, gripper, goal_pose):
     init_pose = group.get_current_pose().pose
@@ -146,14 +183,24 @@ def pull(group, gripper, goal_pose):
     wp2.orientation = GRABBING_QUATERNION
 
     waypoints = [wp1]
-    reversed_waypoints = [init_pose]
     
     reach_waypoints(group, waypoints)
     close_grippers(gripper)
 
-    velocity = Twist()
-    velocity.linear.x = -0.3
+    current_orientation = init_pose.orientation
+    current_position = init_pose.position
+    client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
+    client.wait_for_server()
 
-    start = time.time()
-    while (time.time()-start)<=1:
-        move_base_publisher.publish(velocity)
+    goal = MoveBaseGoal()
+    goal.target_pose.header.frame_id = "base_link"
+    goal.target_pose.header.stamp = rospy.Time.now()
+    goal.target_pose.pose.position = current_position
+    goal.target_pose.pose.positon.x -= 0.4
+    goal.target_pose.pose.orientation = current_orientation
+
+    client.send_goal(goal)
+    wait = client.wait_for_result()
+    if not wait:
+        rospy.logerr("Action server not available!")
+        rospy.signal_shutdown("Action server not available!")

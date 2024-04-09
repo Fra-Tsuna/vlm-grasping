@@ -15,6 +15,8 @@ import os
 import time
 import tf2_ros
 import tf2_py as tf2
+from pal_interaction_msgs.msg import TtsAction, TtsGoal
+from actionlib import SimpleActionClient
 
 from paths import IMAGES_DIR, OUTPUT_DIR
 
@@ -24,6 +26,7 @@ tf_buffer = tf2_ros.Buffer()
 tf_listener = tf2_ros.TransformListener(tf_buffer)
 
 USE_CASE = rospy.get_param('/use_case')
+SPEECH = rospy.get_param('/speech')
 
 SCAN_DIR = IMAGES_DIR+USE_CASE+'/'
 DUMP_DIR = OUTPUT_DIR+USE_CASE+'/'
@@ -42,9 +45,18 @@ def depth_image_to_point_cloud(depth_image, camera_intrinsics):
 
     return points
 
+def say_phrase(phrase):
+    client = SimpleActionClient('/tts', TtsAction)
+    client.wait_for_server()
+    goal = TtsGoal()
+    goal.rawtext.text = phrase
+    goal.rawtext.lang_id = "en_GB"
+    client.send_goal_and_wait(goal)
+
 
 def listener():
-    start = time.time()
+    if SPEECH:
+        say_phrase("Ok I will try to do it")
     msg_img = rospy.wait_for_message("/xtion/rgb/image_rect_color", Image)
     img = bridge.imgmsg_to_cv2(msg_img, "bgr8")
     img_path = SCAN_DIR+'scan.jpg'

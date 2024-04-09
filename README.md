@@ -1,5 +1,7 @@
 <div align="center">
 <img src="/assets/logo.png" width=60%>
+<img src="/assets/logo2.png" width=60%>
+<img src="/assets/logo3.png" width=100%>
 <br>
 <a href="https://www.linkedin.com/in/fra-arg/">Francesco Argenziano</a><sup><span>1</span></sup>,
 <a href="https://scholar.google.com/citations?user=W1KV32kAAAAJ&hl=it&oi=ao/">Elena Umili</a><sup><span>1</span></sup>,

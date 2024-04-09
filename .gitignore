@@ -10,12 +10,6 @@ __pycache__/
 *.onnx
 *.pkl
 
-# Images
-
-*.jpg
-*.jpeg
-*.png
-
 # C extensions
 *.so
 

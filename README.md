@@ -14,7 +14,7 @@
 <div>
 
 [![arxiv paper](https://img.shields.io/badge/Project-Website-blue)](https://sites.google.com/diag.uniroma1.it/empower/home)
-[![arxiv paper](https://img.shields.io/badge/arXiv-TBA-red)]()
+[![arxiv paper](https://img.shields.io/badge/arXiv-TBA-red)](https://sites.google.com/diag.uniroma1.it/empower/home)
 [![license](https://img.shields.io/badge/License-Apache-2.0-green)](LICENSE)
 
 </div>

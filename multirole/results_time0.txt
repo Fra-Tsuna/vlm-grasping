@@ -1,2 +1,0 @@
-move the objects on the table to have the objects ordered by height from the highest to lowest
-Single Agent: -21.69865894317627

@@ -1,7 +1,0 @@
-NAVIGATE to the box and trash bin setup
-GRAB trash bin
-DROP trash bin right to box
-PUSH box away from the door
-NAVIGATE to the door
-PULL door
-NAVIGATE through the doorway

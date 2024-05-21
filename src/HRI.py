@@ -8,27 +8,12 @@ import math
 import os
 from agents import Agents
 
-class Detection:
+class HRI:
 
     def __init__(self):
-        task_description_order = "move the objects on the table to have the objects ordered by height from the highest to lowest"
-        task_description_exit = "exit the room"
-        task_description_diff = "throw away the objects in the corresponding recycling bin"
-        task_description_shelf = "move the objects in the shelf in order to have for each level of the shelf only the objects made of the same material"
-        task_description_shelf2 = "move the objects in the shelf in order to have exactly two objects for level"
-        task_description_jacket = "give me the green jacket from the clothing rack"
-
-        self.task_dict = {
-            "order_by_height": task_description_order,
-            "exit": task_description_exit,
-            "shelf_number": task_description_shelf2,
-            "shelf_material": task_description_shelf,
-            "recycle": task_description_diff,
-            "jacket": task_description_jacket
-        }
+        pass
     
     def run_experiment(self):
-        use_case = self.loader_instance.use_case
         image_path = self.loader_instance.SCAN_DIR+"scan.jpg"
         with open(image_path, "rb") as im_file:
             encoded_image = base64.b64encode(im_file.read()).decode("utf-8")

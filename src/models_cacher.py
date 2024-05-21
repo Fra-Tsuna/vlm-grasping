@@ -7,9 +7,9 @@ import sys
 
 if __name__ == '__main__':
     args = sys.argv[1:]
-    use_case = args[0]
+    #use_case = args[0]
 
-    loader_instance = loader.Loader(use_case)
+    loader_instance = loader.Loader()
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

@@ -19,7 +19,7 @@ class Loader:
 
     def initialize(self, *args):
         use_case = args[0]
-        self._use_case = use_case
+        #self._use_case = use_case
 
         self._CONFIG = CONFIG_DIR
         self._IMAGES = IMAGES_DIR
@@ -137,10 +137,10 @@ class Loader:
     def OUTPUT(self, value):
         self._OUTPUT = value
     
-    @property
-    def use_case(self):
-        return self._use_case
+    # @property
+    # def use_case(self):
+    #     return self._use_case
     
-    @use_case.setter
-    def use_case(self, value):
-        self._use_case = value
+    # @use_case.setter
+    # def use_case(self, value):
+    #     self._use_case = value

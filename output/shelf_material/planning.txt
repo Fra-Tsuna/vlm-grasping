@@ -1,0 +1,24 @@
+NAVIGATE to the shelf
+GRAB object1
+NAVIGATE to the sorting area
+DROP object1 left to sorting area
+NAVIGATE to the shelf
+GRAB object2
+NAVIGATE to the sorting area
+DROP object2 right to object1
+NAVIGATE to the shelf
+GRAB object3
+NAVIGATE to the sorting area
+DROP object3 left to object1
+NAVIGATE to the shelf
+GRAB object4
+NAVIGATE to the sorting area
+DROP object4 right to object2
+NAVIGATE to the shelf
+GRAB object5
+NAVIGATE to the sorting area
+DROP object5 left to object3
+NAVIGATE to the shelf
+GRAB object6
+NAVIGATE to the sorting area
+DROP object6 right to object4
